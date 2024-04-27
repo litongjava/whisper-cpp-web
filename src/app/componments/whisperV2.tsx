@@ -8,7 +8,7 @@ import UploadFileItem from "@/components/common/UploadFileItem";
 import { UploadProps } from "antd/lib/upload/interface";
 import { customEmptyUploadRequest } from "../utils/upload";
 
-const WhisperV1: React.FC = () => {
+const WhisperV2: React.FC = () => {
   const [transcriptionOutput, setTranscriptionOutput] = useState("");
   const [instance, setInstance] = useState<any>(null);
   const [lastModelKey, setLastModelKey] = React.useState("");
@@ -293,4 +293,4 @@ const WhisperV1: React.FC = () => {
   );
 };
 
-export default WhisperV1;
+export default WhisperV2;
