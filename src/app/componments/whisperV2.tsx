@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useState} from "react";
 import Script from "next/script";
-import { getModelBuffer } from "@/app/utils/openDb";
-import { models } from "@/app/constants/models";
-import { Button, Col, message, Row, UploadFile } from "antd";
-import { ProForm, ProFormRadio } from "@ant-design/pro-components";
+import {getModelBuffer} from "@/app/utils/openDb";
+import {models} from "@/app/constants/models";
+import {Col, message, Row, UploadFile} from "antd";
+import {ProForm, ProFormRadio} from "@ant-design/pro-components";
 import UploadFileItem from "@/components/common/UploadFileItem";
-import { UploadProps } from "antd/lib/upload/interface";
-import { customEmptyUploadRequest } from "../utils/upload";
+import {UploadProps} from "antd/lib/upload/interface";
+import {customEmptyUploadRequest} from "../utils/upload";
 
 function WhisperV2() {
-  const [transcriptionOutput, setTranscriptionOutput] = useState("");
   const [instance, setInstance] = useState<any>(null);
   const [lastModelKey, setLastModelKey] = React.useState("");
   const [modelKey, seModelKey] = React.useState("");
@@ -32,12 +31,6 @@ function WhisperV2() {
 
     audioContextRef.current = new AudioContext(contextOptions);
   }, []);
-
-  // useEffect(() => {
-  //   if (transcriptionOutputRef.current) {
-  //     console.log("textarea is now mounted and ref is set.");
-  //   }
-  // }, []);
 
   const print = (text: string) => {
     if (transcriptionOutputRef.current) {
@@ -162,9 +155,7 @@ function WhisperV2() {
 
               let ret = Module.full_default(newInstance, audio, "en", 8, false);
 
-              setTranscriptionOutput(
-                (prevOutput) =>
-                  prevOutput +
+              print(
                   "full_default result code:" +
                   ret +
                   " please wait for translating\n"
@@ -185,7 +176,7 @@ function WhisperV2() {
     reader.readAsArrayBuffer(fileList[0].originFileObj as Blob);
   };
 
-  const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  const handleChange: UploadProps["onChange"] = ({fileList: newFileList}) => {
     setFileList(newFileList);
   };
 
@@ -195,22 +186,12 @@ function WhisperV2() {
     hide();
   };
 
-  const AudioPlayer = React.memo(({ src }) => {
-    return <audio style={{ width: "100%" }} src={src} controls />;
-  });
-
-  const audioSrc = React.useMemo(() => {
-    return fileList.length > 0
-      ? URL.createObjectURL(fileList[0].originFileObj as Blob)
-      : "";
-  }, [fileList]);
-
   let form = (
     <ProForm onFinish={handleSubmit} layout="horizontal">
       <ProFormRadio.Group
         name="model"
         label="Model"
-        options={Object.keys(models).map((key) => ({ label: key, value: key }))}
+        options={Object.keys(models).map((key) => ({label: key, value: key}))}
         initialValue="base-en-q5_1"
         fieldProps={{
           onChange: (e) => seModelKey(e.target.value),
@@ -220,8 +201,8 @@ function WhisperV2() {
         name="language"
         label="Language"
         options={[
-          { label: "auto", value: "auto" },
-          { label: "en", value: "en" },
+          {label: "auto", value: "auto"},
+          {label: "en", value: "en"},
         ]}
         initialValue="en"
       ></ProFormRadio.Group>
@@ -229,8 +210,8 @@ function WhisperV2() {
         name="translate"
         label="Translate"
         options={[
-          { label: "true", value: true },
-          { label: "false", value: false },
+          {label: "true", value: true},
+          {label: "false", value: false},
         ]}
         initialValue={false}
       ></ProFormRadio.Group>
@@ -244,7 +225,7 @@ function WhisperV2() {
       {fileList.length > 0 && (
         <div>
           <audio
-            style={{ width: "100%" }}
+            style={{width: "100%"}}
             src={URL.createObjectURL(fileList[0].originFileObj as Blob)}
             controls
           />
