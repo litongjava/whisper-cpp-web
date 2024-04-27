@@ -1,43 +1,64 @@
 import { models } from "@/app/constants/models";
 
-export const openDb = async (dbName, storeName) => {
-  return new Promise((resolve, reject) => {
+// 定义 ModelData 接口
+interface ModelData {
+  data: ArrayBuffer;
+}
+
+export const openDb = async (dbName:string, storeName:string) => {
+  return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
-    request.onerror = (event) => reject(event.target.error);
-    request.onsuccess = (event) => resolve(event.target.result);
+    // @ts-ignore
+    request.onerror = (event) => reject(event.target?.error);
+    // @ts-ignore
+    request.onsuccess = (event) => resolve(event.target?.result);
     request.onupgradeneeded = (event) => {
-      const db = event.target.result;
+      // @ts-ignore
+      const db:IDBDatabase = event.target?.result;
       db.createObjectStore(storeName, { keyPath: "key" });
     };
   });
 };
 
-export const getModelFromDB = async (key) => {
+export const getModelFromDB = async (key: string): Promise<ModelData | undefined> => {
   const db = await openDb("modelStoreDB", "models");
-  return new Promise((resolve, reject) => {
+  return new Promise<ModelData | undefined>((resolve, reject) => {
     const transaction = db.transaction(["models"], "readonly");
     const store = transaction.objectStore("models");
     const request = store.get(key);
-    request.onsuccess = (event) => resolve(event.target.result);
-    request.onerror = (event) => reject(event.target.error);
+    request.onsuccess = (event) => {
+      // @ts-ignore
+      const result = event.target?.result;
+      if (result) {
+        resolve(result as ModelData);
+      } else {
+        resolve(undefined);
+      }
+    };
+    // @ts-ignore
+    request.onerror = (event) => reject(event.target?.error);
   });
 };
 
-export const saveModelToDB = async (key, data) => {
+
+
+export const saveModelToDB = async (key:string, data:any) => {
   const db = await openDb("modelStoreDB", "models");
   const transaction = db.transaction(["models"], "readwrite");
   const store = transaction.objectStore("models");
   return new Promise((resolve, reject) => {
     const request = store.put({ key, data });
-    request.onsuccess = () => resolve();
-    request.onerror = (event) => reject(event.target.error);
+    request.onsuccess = (ev) => resolve(ev);
+    // @ts-ignore
+    request.onerror = (event) => reject(event.target?.error);
   });
 };
 
-export async function getModelBuffer(modelKey: string) {
+export async function getModelBuffer(modelKey: string): Promise<ModelData> {
   let modelData = await getModelFromDB(modelKey);
   if (!modelData) {
     console.log("Downloading model...");
+    // @ts-ignore
     const modelUrl = models[modelKey];
     const response = await fetch(modelUrl);
     const buffer = await response.arrayBuffer();

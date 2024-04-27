@@ -1,12 +1,12 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import Script from "next/script";
-import {getModelBuffer} from "@/app/utils/openDb";
-import {models} from "@/app/constants/models";
-import {Col, message, Row, UploadFile} from "antd";
-import {ProForm, ProFormRadio} from "@ant-design/pro-components";
+import { getModelBuffer } from "@/app/utils/openDb";
+import { models } from "@/app/constants/models";
+import { Col, message, Row, UploadFile } from "antd";
+import { ProForm, ProFormRadio } from "@ant-design/pro-components";
 import UploadFileItem from "@/components/common/UploadFileItem";
-import {UploadProps} from "antd/lib/upload/interface";
-import {customEmptyUploadRequest} from "../utils/upload";
+import { UploadProps } from "antd/lib/upload/interface";
+import { customEmptyUploadRequest } from "../utils/upload";
 
 function WhisperV2() {
   const [instance, setInstance] = useState<any>(null);
@@ -63,25 +63,25 @@ function WhisperV2() {
     console.log("AudioContext is active:", audioContextRef.current.state);
   };
 
-  const loadModel = async (modelKey: any) => {
+  const loadModel = async (modelKey: string) => {
     console.log("modelKey:", modelKey);
     try {
       let modelData = await getModelBuffer(modelKey);
 
-      if (Module && Module.free && instance) {
-        Module.free(instance);
+      if (window.Module && window.Module.free && instance) {
+        window.Module.free(instance);
         setLastModelKey("");
         console.log("free model:", lastModelKey);
       }
-      if (Module && Module.FS_createDataFile) {
-        Module.FS_createDataFile(
+      if (window.Module && window.Module.FS_createDataFile) {
+        window.Module.FS_createDataFile(
           "/",
           modelKey,
           new Uint8Array(modelData.data),
           true,
           true
         );
-        let newInstance = Module.init(modelKey);
+        let newInstance = window.Module.init(modelKey);
         setInstance(newInstance);
         setLastModelKey(modelKey);
         console.log(
@@ -119,7 +119,7 @@ function WhisperV2() {
 
     // 读取音频文件
 
-    let onload = async (event) => {
+    let onload = async (event: any) => {
       const audioData = event.target.result as ArrayBuffer;
       var buf = new Uint8Array(audioData);
       initializeAudioContext();
@@ -153,10 +153,10 @@ function WhisperV2() {
               // 用于处理音频的函数会自动加载 libmain.worker.js
               // //转写对象,音频数据,语言,线程,是否翻译
 
-              let ret = Module.full_default(newInstance, audio, "en", 8, false);
+              let ret = window.Module.full_default(newInstance, audio, "en", 8, false);
 
               print(
-                  "full_default result code:" +
+                "full_default result code:" +
                   ret +
                   " please wait for translating\n"
               );
@@ -176,7 +176,7 @@ function WhisperV2() {
     reader.readAsArrayBuffer(fileList[0].originFileObj as Blob);
   };
 
-  const handleChange: UploadProps["onChange"] = ({fileList: newFileList}) => {
+  const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
     setFileList(newFileList);
   };
 
@@ -191,7 +191,7 @@ function WhisperV2() {
       <ProFormRadio.Group
         name="model"
         label="Model"
-        options={Object.keys(models).map((key) => ({label: key, value: key}))}
+        options={Object.keys(models).map((key) => ({ label: key, value: key }))}
         initialValue="base-en-q5_1"
         fieldProps={{
           onChange: (e) => seModelKey(e.target.value),
@@ -201,8 +201,8 @@ function WhisperV2() {
         name="language"
         label="Language"
         options={[
-          {label: "auto", value: "auto"},
-          {label: "en", value: "en"},
+          { label: "auto", value: "auto" },
+          { label: "en", value: "en" },
         ]}
         initialValue="en"
       ></ProFormRadio.Group>
@@ -210,8 +210,8 @@ function WhisperV2() {
         name="translate"
         label="Translate"
         options={[
-          {label: "true", value: true},
-          {label: "false", value: false},
+          { label: "true", value: true },
+          { label: "false", value: false },
         ]}
         initialValue={false}
       ></ProFormRadio.Group>
@@ -225,7 +225,7 @@ function WhisperV2() {
       {fileList.length > 0 && (
         <div>
           <audio
-            style={{width: "100%"}}
+            style={{ width: "100%" }}
             src={URL.createObjectURL(fileList[0].originFileObj as Blob)}
             controls
           />
